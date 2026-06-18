@@ -22,8 +22,11 @@ export default function Dashboard() {
       setLoading(true);
       setReport(null);
 
+      // ----------------------------
+      // FIXED FORM DATA (IMPORTANT)
+      // ----------------------------
       const formData = new FormData();
-      formData.append("resume", file);
+      formData.append("file", file); // ✅ FIXED KEY
       formData.append("jobDescription", jobDescription);
       formData.append("selfDescription", selfDescription);
 
@@ -38,7 +41,7 @@ export default function Dashboard() {
 
       setReport(data);
     } catch (err) {
-      console.error(err);
+      console.error("API ERROR:", err);
       setError("❌ Error generating report. Try again.");
     } finally {
       setLoading(false);
@@ -49,7 +52,9 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-950 text-white flex">
       {/* SIDEBAR */}
       <div className="w-64 bg-gray-900 p-5 border-r border-gray-800">
-        <h1 className="text-xl font-bold text-green-400 mb-8">AI SaaS</h1>
+        <h1 className="text-xl font-bold text-green-400 mb-8">
+          ResumeIQ AI 🚀
+        </h1>
 
         <nav className="space-y-3 text-gray-300">
           <p className="hover:text-white cursor-pointer">Dashboard</p>
@@ -62,16 +67,18 @@ export default function Dashboard() {
       {/* MAIN */}
       <div className="flex-1 p-8 overflow-auto">
         {/* HEADER */}
-        <h1 className="text-3xl font-bold mb-6">Interview AI Dashboard 🚀</h1>
+        <h1 className="text-3xl font-bold mb-6">ResumeIQ AI Dashboard 🚀</h1>
 
         {/* INPUT CARD */}
         <div className="bg-gray-900 p-6 rounded-xl border border-gray-800 space-y-4">
+          {/* FILE UPLOAD */}
           <input
             type="file"
             onChange={(e) => setFile(e.target.files[0])}
             className="w-full text-sm"
           />
 
+          {/* SELF DESCRIPTION */}
           <textarea
             placeholder="Self Description"
             className="w-full p-3 bg-gray-800 rounded outline-none"
@@ -79,6 +86,7 @@ export default function Dashboard() {
             onChange={(e) => setSelfDescription(e.target.value)}
           />
 
+          {/* JOB DESCRIPTION */}
           <textarea
             placeholder="Job Description"
             className="w-full p-3 bg-gray-800 rounded outline-none"
@@ -86,6 +94,7 @@ export default function Dashboard() {
             onChange={(e) => setJobDescription(e.target.value)}
           />
 
+          {/* BUTTON */}
           <button
             onClick={handleSubmit}
             disabled={loading}

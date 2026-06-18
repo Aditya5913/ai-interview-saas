@@ -8,7 +8,7 @@ const {
 const interviewReportModel = require("../models/interviewReport.model");
 
 /**
- * Generate interview report
+ * Generate interview report (SAFE VERSION)
  */
 async function generateInterViewReportController(req, res) {
   try {
@@ -18,7 +18,6 @@ async function generateInterViewReportController(req, res) {
       });
     }
 
-    // Parse PDF
     const pdfData = await pdfParse(req.file.buffer);
     const resumeText = pdfData.text || "";
 
@@ -30,30 +29,45 @@ async function generateInterViewReportController(req, res) {
       });
     }
 
-    // AI call
-    const aiReport = await generateInterviewReport({
-      resume: resumeText,
-      selfDescription,
-      jobDescription,
-    });
+    // ----------------------------
+    // SAFE AI CALL (NO CRASH)
+    // ----------------------------
+    let aiReport;
 
-    console.log("AI REPORT RECEIVED:", aiReport);
+    try {
+      aiReport = await generateInterviewReport({
+        resume: resumeText,
+        selfDescription,
+        jobDescription,
+      });
+    } catch (aiError) {
+      console.log("⚠️ AI ERROR HANDLED:", aiError.message);
 
-    // SAFE DB SAVE (no spread bug)
+      aiReport = {
+        title: "AI Report Temporarily Unavailable",
+        matchScore: 0,
+        technicalQuestions: [],
+        behavioralQuestions: [],
+        skillGaps: [],
+        preparationPlan: [],
+      };
+    }
+
+    // ----------------------------
+    // SAFE DB SAVE
+    // ----------------------------
     const interviewReport = await interviewReportModel.create({
-      user: req.user.id,
+      user: req.user?.id,
       resume: resumeText,
       selfDescription,
       jobDescription,
 
-      title: aiReport.title || "Interview Report - ECE Fresher",
-
-      matchScore: aiReport.matchScore || 0,
-
-      technicalQuestions: aiReport.technicalQuestions || [],
-      behavioralQuestions: aiReport.behavioralQuestions || [],
-      skillGaps: aiReport.skillGaps || [],
-      preparationPlan: aiReport.preparationPlan || [],
+      title: aiReport?.title || "Interview Report",
+      matchScore: aiReport?.matchScore || 0,
+      technicalQuestions: aiReport?.technicalQuestions || [],
+      behavioralQuestions: aiReport?.behavioralQuestions || [],
+      skillGaps: aiReport?.skillGaps || [],
+      preparationPlan: aiReport?.preparationPlan || [],
     });
 
     return res.status(201).json({
@@ -61,7 +75,7 @@ async function generateInterViewReportController(req, res) {
       interviewReport,
     });
   } catch (error) {
-    console.log("ERROR:", error);
+    console.log("❌ CONTROLLER ERROR:", error);
 
     return res.status(500).json({
       message: "Error generating interview report",
@@ -71,7 +85,7 @@ async function generateInterViewReportController(req, res) {
 }
 
 /**
- * Get by ID
+ * Get single report
  */
 async function getInterviewReportByIdController(req, res) {
   try {
@@ -154,6 +168,9 @@ async function generateResumePdfController(req, res) {
   }
 }
 
+// ----------------------------
+// EXPORTS (DO NOT CHANGE THIS)
+// ----------------------------
 module.exports = {
   generateInterViewReportController,
   getInterviewReportByIdController,

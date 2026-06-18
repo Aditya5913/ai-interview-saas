@@ -6,21 +6,17 @@ const upload = require("../middlewares/file.middleware");
 const interviewRouter = express.Router();
 
 /**
- * @route POST /api/interview/
- * @description generate new interview report on the basis of user self description,resume pdf and job description.
- * @access private
+ * CREATE INTERVIEW REPORT
  */
 interviewRouter.post(
   "/",
   authMiddleware.authUser,
-  upload.single("resume"),
+  upload.single("file"), // ✅ FIXED HERE
   interviewController.generateInterViewReportController,
 );
 
 /**
- * @route GET /api/interview/report/:interviewId
- * @description get interview report by interviewId.
- * @access private
+ * GET BY ID
  */
 interviewRouter.get(
   "/report/:interviewId",
@@ -29,9 +25,7 @@ interviewRouter.get(
 );
 
 /**
- * @route GET /api/interview/
- * @description get all interview reports of logged in user.
- * @access private
+ * GET ALL REPORTS
  */
 interviewRouter.get(
   "/",
@@ -40,9 +34,7 @@ interviewRouter.get(
 );
 
 /**
- * @route GET /api/interview/resume/pdf
- * @description generate resume pdf on the basis of user self description, resume content and job description.
- * @access private
+ * GENERATE PDF
  */
 interviewRouter.post(
   "/resume/pdf/:interviewReportId",
