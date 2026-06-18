@@ -11,7 +11,10 @@ const ai = new GoogleGenAI({
  * =========================
  */
 function extractJSON(text) {
-  if (!text) throw new Error("Empty AI response");
+  if (!text) {
+    console.log("❌ Empty AI response");
+    throw new Error("Empty AI response");
+  }
 
   try {
     return JSON.parse(text);
@@ -24,7 +27,7 @@ function extractJSON(text) {
 
       return JSON.parse(cleaned);
     } catch (e) {
-      console.log("❌ JSON PARSE FAILED:", text);
+      console.log("❌ JSON PARSE FAILED RAW:", text);
 
       // SAFE FALLBACK
       return {
@@ -33,7 +36,7 @@ function extractJSON(text) {
         behavioralQuestions: [],
         skillGaps: [],
         preparationPlan: [],
-        title: "AI response parse failed",
+        title: "AI parse failed",
       };
     }
   }
@@ -41,59 +44,64 @@ function extractJSON(text) {
 
 /**
  * =========================
- * SAFE AI CALL (NO CRASH SYSTEM)
+ * SAFE AI CALL (PRODUCTION READY)
  * =========================
  */
-async function safeAI(prompt, retries = 2) {
+async function safeAI(prompt, retries = 3) {
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-1.5-flash", // ✅ FIXED STABLE MODEL
+      model: "gemini-1.5-pro", // 🔥 STABLE MODEL (IMPORTANT FIX)
       contents: prompt,
     });
 
+    // 🔥 FIXED RESPONSE EXTRACTION (MAIN BUG FIX)
     const text =
-      response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text;
+      response?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      response?.text ||
+      "";
+
+    console.log("✅ AI RAW TEXT:", text);
 
     return extractJSON(text);
   } catch (err) {
     console.log("❌ AI ERROR:", err.message);
 
     if (retries > 0) {
-      console.log(`🔁 Retrying AI... (${retries})`);
+      console.log(`🔁 Retrying AI... attempts left: ${retries}`);
 
-      await new Promise((r) => setTimeout(r, 1500));
+      await new Promise((r) => setTimeout(r, 2000));
 
       return safeAI(prompt, retries - 1);
     }
 
-    // FINAL SAFE FALLBACK (NO CRASH)
+    // 🚨 FINAL FALLBACK (NO CRASH)
     return {
-      matchScore: 50,
+      matchScore: 40,
       technicalQuestions: [
         {
-          question: "Tell me about your technical skills",
-          intention: "General assessment",
-          answer: "Practice core fundamentals",
+          question: "Explain your technical background",
+          intention: "General evaluation",
+          answer: "Describe your core skills clearly",
         },
       ],
       behavioralQuestions: [
         {
-          question: "Describe a challenge you faced",
-          intention: "Behavior check",
-          answer: "Explain with STAR method",
+          question: "Tell me about a challenge you faced",
+          intention: "Behavioral check",
+          answer: "Use STAR method (Situation, Task, Action, Result)",
         },
       ],
       skillGaps: [
         {
-          skill: "System temporarily unavailable",
+          skill: "AI temporarily unavailable",
           severity: "medium",
         },
       ],
       preparationPlan: [
         {
           day: 1,
-          focus: "Revise basics",
-          tasks: ["Practice coding", "Review concepts"],
+          focus: "Revise fundamentals",
+          tasks: ["Practice coding", "Revise core concepts"],
         },
       ],
       title: "AI Fallback Report",
@@ -112,24 +120,24 @@ async function generateInterviewReport({
   jobDescription,
 }) {
   const prompt = `
-You are a senior recruiter AI.
+You are an expert recruiter AI.
 
 Return ONLY valid JSON.
 
-Rules:
-- matchScore 0 to 100
+RULES:
+- matchScore must be 0-100
+- minimum 3 items per array
 - realistic answers
 - no markdown
-- at least 3 items per list
 
 DATA:
 Resume: ${resume}
 
-Self Description: ${selfDescription}
+Self: ${selfDescription}
 
-Job Description: ${jobDescription}
+Job: ${jobDescription}
 
-FORMAT:
+OUTPUT FORMAT:
 {
   "matchScore": number,
   "technicalQuestions": [],
@@ -194,12 +202,12 @@ Generate ATS-friendly resume HTML.
 
 Return ONLY JSON:
 {
-  "html": "<html>...</html>"
+  "html": "<html></html>"
 }
 
-Rules:
-- clean professional design
-- ATS friendly
+RULES:
+- professional ATS format
+- clean structure
 - no fancy styling
 
 Resume:
@@ -213,12 +221,14 @@ ${jobDescription}
 `;
 
   const response = await ai.models.generateContent({
-    model: "gemini-1.5-flash", // ✅ FIXED
+    model: "gemini-1.5-pro", // 🔥 FIXED MODEL
     contents: prompt,
   });
 
   const text =
-    response?.text || response?.candidates?.[0]?.content?.parts?.[0]?.text;
+    response?.candidates?.[0]?.content?.parts?.[0]?.text ||
+    response?.text ||
+    "";
 
   const json = extractJSON(text);
 
