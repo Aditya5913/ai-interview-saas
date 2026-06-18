@@ -12,21 +12,31 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // ----------------------
-// CORS CONFIG (IMPORTANT for deploy)
+// CORS CONFIG (FINAL PRODUCTION)
 // ----------------------
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://ai-interview-saas-sigma.vercel.app",
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:3000",
-      // 👉 production frontend URL yaha add karna baad me
-    ],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS Not Allowed"));
+      }
+    },
     credentials: true,
   }),
 );
 
 // ----------------------
-// HEALTH CHECK ROUTE
+// HEALTH CHECK
 // ----------------------
 app.get("/", (req, res) => {
   res.json({
@@ -35,7 +45,6 @@ app.get("/", (req, res) => {
   });
 });
 
-// optional health route
 app.get("/health", (req, res) => {
   res.send("OK");
 });
