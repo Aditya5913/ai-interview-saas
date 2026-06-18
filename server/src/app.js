@@ -12,7 +12,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // ----------------------
-// CORS CONFIG (FINAL PRODUCTION)
+// CORS CONFIG (PRODUCTION SAFE)
 // ----------------------
 const allowedOrigins = [
   "http://localhost:5173",
@@ -20,18 +20,23 @@ const allowedOrigins = [
   "https://ai-interview-saas-sigma.vercel.app",
 ];
 
+// ✅ FIX: safer CORS handling (no crash on bad origin)
 app.use(
   cors({
     origin: function (origin, callback) {
+      // allow server-to-server / postman
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
-        callback(null, true);
+        return callback(null, true);
       } else {
-        callback(new Error("CORS Not Allowed"));
+        console.log("Blocked CORS Origin:", origin);
+        return callback(null, false);
       }
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 

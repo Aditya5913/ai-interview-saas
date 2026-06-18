@@ -7,34 +7,47 @@ export default function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault(); // ✅ IMPORTANT (stop page reload / loop)
+
+    if (!email || !password) {
+      alert("Please fill all fields");
+      return;
+    }
+
     try {
+      setLoading(true);
+
       const res = await api.post("/auth/login", {
         email,
         password,
       });
 
-    
-console.log("LOGIN RESPONSE:", res.data);
+      console.log("LOGIN RESPONSE:", res.data);
 
-const token =
-  res.data.token ||
-  res.data.accessToken ||
-  res.data.jwt ||
-  res.data.data?.token;
+      const token =
+        res.data.token ||
+        res.data.accessToken ||
+        res.data.jwt ||
+        res.data.data?.token;
 
-if (token) {
-  localStorage.setItem("token", token);
-  console.log("TOKEN SAVED");
-}
+      if (token) {
+        localStorage.setItem("token", token);
+        console.log("TOKEN SAVED");
+      } else {
+        console.log("NO TOKEN FOUND IN RESPONSE");
+      }
 
-alert("Login Successful");
-navigate("/dashboard");
-;
+      alert("Login Successful 🚀");
+
+      navigate("/dashboard");
     } catch (err) {
-      console.log("LOGIN ERROR:", err.response?.data);
-      alert("Login Failed");
+      console.log("LOGIN ERROR:", err.response?.data || err.message);
+      alert("Login Failed ❌");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -43,25 +56,30 @@ navigate("/dashboard");
       <div className="bg-gray-800 p-8 rounded-xl w-96">
         <h1 className="text-white text-2xl mb-5">Login</h1>
 
-        <input
-          className="w-full p-2 mb-3 rounded"
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <form onSubmit={handleLogin}>
+          <input
+            className="w-full p-2 mb-3 rounded"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-        <input
-          className="w-full p-2 mb-3 rounded"
-          placeholder="Password"
-          type="password"
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <input
+            className="w-full p-2 mb-3 rounded"
+            placeholder="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-        <button
-          onClick={handleLogin}
-          className="w-full bg-blue-500 text-white p-2 rounded"
-        >
-          Login
-        </button>
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white p-2 rounded"
+            disabled={loading}
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
 
         <p className="text-white mt-3 text-sm">
           No account?{" "}
