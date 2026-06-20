@@ -63,9 +63,13 @@ export default function Dashboard() {
             Reports
           </Link>
 
-          <p className="hover:text-white cursor-pointer">Resume Builder</p>
+          <Link to="/resume-builder" className="block hover:text-white">
+            Resume Builder
+          </Link>
 
-          <p className="hover:text-white cursor-pointer">Settings</p>
+          <Link to="/settings" className="block hover:text-white">
+            Settings
+          </Link>
         </nav>
       </div>
       {/* MAIN */}

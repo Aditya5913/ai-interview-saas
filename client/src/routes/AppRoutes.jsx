@@ -3,6 +3,8 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
 import Reports from "../pages/Reports";
+import ResumeBuilder from "../pages/ResumeBuilder";
+import Settings from "../pages/Settings";
 
 export default function AppRoutes() {
   return (
@@ -12,6 +14,8 @@ export default function AppRoutes() {
       <Route path="/register" element={<Register />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/reports" element={<Reports />} />
+      <Route path="/resume-builder" element={<ResumeBuilder />} />
+      <Route path="/settings" element={<Settings />} />
     </Routes>
   );
 }
