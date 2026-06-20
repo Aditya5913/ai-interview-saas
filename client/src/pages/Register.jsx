@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 
 export default function Register() {
@@ -11,7 +11,7 @@ export default function Register() {
 
   const handleRegister = async () => {
     try {
-      const res = await axios.post("http://localhost:4000/api/auth/register", {
+      const res = await api.post("/auth/register", {
         username,
         email,
         password,
@@ -21,11 +21,11 @@ export default function Register() {
 
       alert("Account Created Successfully 🎉");
 
-      // 👉 redirect to HOME (/)
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       console.log("ERROR:", error.response?.data || error.message);
-      alert("Registration Failed");
+
+      alert(error.response?.data?.message || "Registration Failed");
     }
   };
 
@@ -63,12 +63,11 @@ export default function Register() {
           Create Account
         </button>
 
-        {/* Back to HOME button */}
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/login")}
           className="w-full mt-3 bg-blue-500 text-white p-2 rounded"
         >
-          Back to Home
+          Back to Login
         </button>
       </div>
     </div>
