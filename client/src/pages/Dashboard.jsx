@@ -39,44 +39,43 @@ export default function Dashboard() {
 
       setReport(data);
     } catch (err) {
-      console.error("API ERROR:", err);
-      setError("❌ Error generating report. Try again.");
+      console.log(err);
+      setError("❌ Error generating report");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex">
-      {/* SIDEBAR */}{" "}
-      <div className="w-64 bg-gray-900 p-5 border-r border-gray-800">
-        {" "}
-        <h1 className="text-xl font-bold text-green-400 mb-8">
-          ResumeIQ AI 🚀{" "}
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-950 text-white">
+      {/* SIDEBAR */}
+      <aside className="w-full md:w-64 bg-gray-900 border-b md:border-r border-gray-800 p-4">
+        <h1 className="text-xl font-bold text-green-400 mb-4">
+          ResumeIQ AI 🚀
         </h1>
-        <nav className="space-y-3 text-gray-300">
-          <Link to="/dashboard" className="block hover:text-white">
+
+        <nav className="flex md:flex-col gap-3 text-sm md:text-base overflow-x-auto">
+          <Link className="hover:text-white" to="/dashboard">
             Dashboard
           </Link>
-
-          <Link to="/reports" className="block hover:text-white">
+          <Link className="hover:text-white" to="/reports">
             Reports
           </Link>
-
-          <Link to="/resume-builder" className="block hover:text-white">
-            Resume Builder
+          <Link className="hover:text-white" to="/resume-builder">
+            Resume
           </Link>
-
-          <Link to="/settings" className="block hover:text-white">
+          <Link className="hover:text-white" to="/settings">
             Settings
           </Link>
         </nav>
-      </div>
-      {/* MAIN */}
-      <div className="flex-1 p-8 overflow-auto">
-        <h1 className="text-3xl font-bold mb-6">ResumeIQ AI Dashboard 🚀</h1>
+      </aside>
 
-        <div className="bg-gray-900 p-6 rounded-xl border border-gray-800 space-y-4">
+      {/* MAIN */}
+      <main className="flex-1 p-4 md:p-8 overflow-auto">
+        <h1 className="text-2xl md:text-3xl font-bold mb-6">Dashboard 🚀</h1>
+
+        {/* INPUT CARD */}
+        <div className="bg-gray-900 p-4 md:p-6 rounded-xl space-y-4 border border-gray-800">
           <input
             type="file"
             onChange={(e) => setFile(e.target.files[0])}
@@ -85,14 +84,14 @@ export default function Dashboard() {
 
           <textarea
             placeholder="Self Description"
-            className="w-full p-3 bg-gray-800 rounded outline-none"
+            className="w-full p-3 bg-gray-800 rounded"
             value={selfDescription}
             onChange={(e) => setSelfDescription(e.target.value)}
           />
 
           <textarea
             placeholder="Job Description"
-            className="w-full p-3 bg-gray-800 rounded outline-none"
+            className="w-full p-3 bg-gray-800 rounded"
             value={jobDescription}
             onChange={(e) => setJobDescription(e.target.value)}
           />
@@ -100,7 +99,7 @@ export default function Dashboard() {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="bg-green-500 px-5 py-2 rounded hover:bg-green-600 disabled:opacity-50"
+            className="w-full md:w-auto bg-green-500 px-5 py-2 rounded hover:bg-green-600"
           >
             {loading ? "AI Analyzing..." : "Generate Report"}
           </button>
@@ -108,24 +107,18 @@ export default function Dashboard() {
           {error && <p className="text-red-400 text-sm">{error}</p>}
         </div>
 
+        {/* LOADING */}
         {loading && (
-          <p className="text-yellow-400 mt-5 animate-pulse">
-            AI analyzing resume... ⏳
-          </p>
+          <p className="text-yellow-400 mt-4 animate-pulse">Processing...</p>
         )}
 
-        {!report && !loading && !error && (
-          <p className="text-gray-500 mt-6">
-            Upload resume and generate AI report
-          </p>
-        )}
-
+        {/* REPORT */}
         {report && (
           <div className="mt-6">
             <ReportCard report={report} />
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
